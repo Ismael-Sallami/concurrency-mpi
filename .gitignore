@@ -1,0 +1,8 @@
+# Build outputs
+*.o
+*.out
+*.exe
+a.out
+# Binaries (no extension) are kept out; add explicitly if needed
+bin/
+build/
