@@ -1,0 +1,8 @@
+# Programs that do not compile as they were handed in. One path per line, with the
+# reason next to it. They are not patched: a deliverable that is rewritten to make a
+# linter happy is no longer the deliverable.
+#
+# tools/build-all.sh skips them, and fails if one of them starts building, so this
+# list cannot go stale without anyone noticing.
+
+src/practice-1-semaphores/smokers/smokers.cpp  # calls fumar() at line 75, defined at line 83 with no forward declaration

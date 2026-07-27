@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Ismael Sallami Moreno DNI:
+// Ismael Sallami Moreno
 
 // Sistemas concurrentes y Distribuidos.
 // Práctica 4. Implementación de sistemas de tiempo real.

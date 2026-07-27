@@ -1,0 +1,22 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OpenMPI
+        run: sudo apt-get update && sudo apt-get install -y openmpi-bin libopenmpi-dev
+
+      # Compiles the four practices, the extra activity and the exams. The programs
+      # listed in tools/known-build-failures.txt are expected to fail, and the script
+      # errors out if one of them starts building.
+      - name: Build every program
+        run: bash tools/build-all.sh

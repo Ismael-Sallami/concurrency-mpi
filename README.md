@@ -1,42 +1,124 @@
-# SCD · Concurrency & Distributed Systems (C++ / MPI)
+# concurrency-mpi
 
-Concurrent and distributed programming built from primitives — **~8,500 lines of C++**
-across the four lab assignments of *Sistemas Concurrentes y Distribuidos* (Concurrency &
-Distributed Systems), Computer Engineering, University of Granada.
+![C++](https://img.shields.io/badge/C%2B%2B-11-00599C)
+![OpenMPI](https://img.shields.io/badge/OpenMPI-4.1-cf4a2b)
+[![build](https://img.shields.io/github/actions/workflow/status/Ismael-Sallami/concurrency-mpi/ci.yml?branch=main&logo=github&label=build)](https://github.com/Ismael-Sallami/concurrency-mpi/actions/workflows/ci.yml)
+![license](https://img.shields.io/badge/license-MIT-4c1)
 
-## What's inside
+Thirty-one programs that solve the classic synchronisation problems three times over: with
+semaphores, with monitors and with message passing.
 
-| Assignment | Topic | Key implementations |
-|---|---|---|
-| **Práctica 1** | Semaphores | Producer–consumer with **FIFO and LIFO** buffers, multi-producer/multi-consumer, cigarette-smokers |
-| **Práctica 2** | Monitors (SU / Hoare) | Readers–writers, cigarette-smokers, bounded multiple producer–consumer |
-| **Práctica 3** | Message passing (**MPI**) | **Dining philosophers** with deadlock analysis + waiter/arbitrator fix, distributed producer–consumer |
-| **Práctica 4** | Real-time systems | **Cyclic executive schedulers** with period / WCET timing analysis, clock synchronization |
-| **Extra** | MPI | Distributed Sieve of Eratosthenes |
+## Context
 
-## Concepts demonstrated
+Coursework for **Sistemas Concurrentes y Distribuidos**, year 3 of the double degree in
+Computer Science and Business Administration, University of Granada (2024-25). Solo work.
 
-- Synchronization primitives: semaphores, SU/Hoare monitors, condition variables.
-- **Deadlock**: detection, analysis and resolution (arbitrator pattern in dining philosophers).
-- **Distributed message passing with MPI** (point-to-point and process topologies).
-- **Real-time scheduling**: cyclic executives, period/WCET budgeting, timing measurement.
-- Classic problems: producer–consumer (FIFO/LIFO), readers–writers, cigarette-smokers.
+The `scd` support library (`scd.h`, `scd.cpp`) is provided by the subject and is kept
+because the programs do not compile without it.
 
-## Build
+## The problem
 
-Threaded programs (C++11):
-```bash
-g++ -std=c++11 -pthread src/Practica2/escritores-lectores.cpp -o rw && ./rw
+The same problems come back at every level of abstraction, and that repetition is the point
+of the subject: producer-consumer, readers-writers, cigarette smokers and dining
+philosophers, solved first with the lowest primitive available and then with higher ones.
+
+Each solution has to guarantee three things, and none of them can be checked by looking at
+one run: mutual exclusion where the resource demands it, no deadlock, and no starvation.
+
+## The solution
+
+| Practice | Tool | Programs |
+| --- | --- | --- |
+| 1 | Semaphores | Producer-consumer with **FIFO and LIFO** buffers, the multiple-producer multiple-consumer version, cigarette smokers |
+| 2 | **SU monitors** | Readers-writers, smokers, bounded multiple producer-consumer |
+| 3 | **MPI** | Dining philosophers, the version that deadlocks, and the fix with a waiter; distributed producer-consumer with an intermediate buffer process |
+| 4 | Real time | Cyclic executives with period and WCET analysis, clock and duration handling |
+| Extra | MPI | Distributed Sieve of Eratosthenes |
+
+Details worth naming:
+
+- **The deadlock is committed on purpose.** `philosophers-deadlock.cpp` is the version where
+  every philosopher takes the same fork first, and it hangs. `philosophers-waiter.cpp` adds
+  the arbitrator that limits how many sit at once, which is the standard fix. Keeping both
+  is what makes the problem visible.
+- **FIFO and LIFO are separate programs**, not a flag. The order of the buffer changes which
+  index the producer and the consumer touch, so the two solutions are different code, and
+  the outputs in `docs/results/` show the difference.
+- **The cyclic executives are timed, not guessed.** `timing.cpp` and `clocks.cpp` work with
+  durations and instants so the schedule can be checked against the period and the
+  worst-case execution time, instead of assuming the tasks fit.
+- **The exams are here too.** `docs/exams/` holds seven problems solved under exam
+  conditions: supermarket checkouts, philosophers with a waiter in two different styles,
+  producer-consumer with odd and even consumers, and two turn-based games over MPI.
+
+## Layout
+
 ```
-MPI programs:
-```bash
-mpicxx src/Practica3/scd-p3-fuentes/filosofos.cpp -o filo && mpirun -np 6 ./filo
+src/practice-1-semaphores/    producer-consumer, its multiple version and the smokers
+src/practice-2-monitors/      the same problems with SU monitors, plus readers-writers
+src/practice-3-mpi/           philosophers and distributed producer-consumer
+src/practice-4-realtime/      cyclic executives, clocks and timing
+src/extra-mpi-sieve/          distributed Sieve of Eratosthenes
+docs/exams/                   seven exam problems
+docs/results/                 captured output of the runs
+tools/build-all.sh            builds everything in one command
 ```
 
-## Metrics
+## Requirements
 
-- **8,497 lines** of author-written C++ across 37 source files.
-- 4 lab assignments + 1 extra MPI activity.
+- A C++ compiler with C++11 (g++ 11 or later).
+- OpenMPI (`openmpi-bin`, `libopenmpi-dev`) for the MPI programs.
 
----
-Author: **Ismael Sallami Moreno** · University of Granada.
+## Build and run
+
+```bash
+bash tools/build-all.sh                      # every program, binaries land in build/
+./build/prodcons-fifo                        # threaded programs run straight away
+mpirun -np 11 ./build/philosophers-waiter    # philosophers, forks and the waiter
+mpirun -np 21 ./build/sieve                  # the sieve, one process per range
+```
+
+The MPI programs fix the number of processes they need in a constant at the top of the file:
+`num_procesos` in the philosophers, `num_prod` and `num_cons` in the producer-consumer.
+Passing a different `-np` makes them abort on purpose.
+
+## Results
+
+Sample runs are captured in `docs/results/`. The producer-consumer output prints the slot the
+buffer touches on each operation, which is where the FIFO and LIFO versions diverge:
+
+```
+Problema de los productores-consumidores (solución LIFO).
+El valor de primera_libre es: 0
+Pasamos a extraer el dato...
+producido: 0
+```
+
+The sieve reports which process found each prime, so the distribution of work is visible:
+
+```
+Proceso 19: 61 es primo.
+Proceso 19: 67 es primo.
+Proceso 19: 71 es primo.
+```
+
+## What I learned
+
+- A concurrent program that runs correctly once proves nothing. The interesting bugs only
+  appear under a particular interleaving, which is why the deadlocking version of the
+  philosophers is worth keeping next to the fixed one.
+- Monitors move the synchronisation from the caller to the resource. With semaphores every
+  caller has to remember to signal; with a monitor, forgetting is not an option the caller
+  has. That is the whole difference between practices 1 and 2.
+- **Limitations, kept as handed in:**
+  - `src/practice-1-semaphores/smokers/smokers.cpp` **does not compile**: it calls `fumar()`
+    at line 75, and the function is defined at line 83 with no forward declaration. It is
+    listed in `tools/known-build-failures.txt` with the reason, and the build script fails
+    if it ever starts building, so the list cannot rot. It is not patched.
+  - Practice 3 keeps the base programs given with the assignment next to my versions,
+    because the versions are edits of them and separating them would hide what changed.
+  - Identifiers and comments are in Spanish, and so are the captured outputs.
+
+## Author and licence
+
+Ismael Sallami Moreno. Released under the MIT licence (see `LICENSE`).

@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------
-// Ismael Sallami Moreno DNI:
+// Ismael Sallami Moreno
+
 // Sistemas concurrentes y Distribuidos.
 // Práctica 4. Implementación de sistemas de tiempo real.
 //
@@ -73,6 +74,7 @@ int main( int argc, char *argv[] )
 
    while( true ) // ciclo principal
    {
+//   ------------
       cout << endl
            << "---------------------------------------" << endl
            << "Comienza iteración del ciclo principal." << endl ;
@@ -94,6 +96,13 @@ int main( int argc, char *argv[] )
 
          // esperar hasta el inicio de la siguiente iteración del ciclo secundario
          sleep_until( ini_sec );
+
+         // calcular el retraso real al final del ciclo secundario
+         time_point<steady_clock> fin_real = steady_clock::now();
+         milliseconds_f retraso = milliseconds_f(fin_real - ini_sec);
+
+         // informar del retraso
+         cout << "Retraso en esta iteración: " << retraso.count() << " ms." << endl;
       }
    }
 }
