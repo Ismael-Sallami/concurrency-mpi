@@ -10,7 +10,7 @@ semaphores, with monitors and with message passing.
 
 ## Context
 
-Coursework for **Sistemas Concurrentes y Distribuidos**, year 3 of the double degree in
+Coursework for **Concurrent and Distributed Systems**, year 3 of the double degree in
 Computer Science and Business Administration, University of Granada (2024-25). Solo work.
 
 The `scd` support library (`scd.h`, `scd.cpp`) is provided by the subject and is kept
@@ -84,23 +84,17 @@ Passing a different `-np` makes them abort on purpose.
 
 ## Results
 
-Sample runs are captured in `docs/results/`. The producer-consumer output prints the slot the
-buffer touches on each operation, which is where the FIFO and LIFO versions diverge:
+Sample runs are captured in `docs/results/`. The programs print in Spanish, so the files are
+worth opening rather than quoted here.
 
-```
-Problema de los productores-consumidores (solución LIFO).
-El valor de primera_libre es: 0
-Pasamos a extraer el dato...
-producido: 0
-```
+The producer-consumer traces the buffer indices on every operation, and that is where the
+two versions part company: the FIFO run reports a read cursor 80 times and the LIFO run
+never does, because popping from the end you pushed to does not need one. Both captures
+carry the same banner, though, since `prodcons-fifo.cpp:153` prints the LIFO one. The
+banner is copy-pasted; the traced indices are not.
 
-The sieve reports which process found each prime, so the distribution of work is visible:
-
-```
-Proceso 19: 61 es primo.
-Proceso 19: 67 es primo.
-Proceso 19: 71 es primo.
-```
+The sieve reports which process found each prime, so the split of the ranges is visible:
+process 19 accounts for 61, 67, 71 and on up.
 
 ## What I learned
 
@@ -117,7 +111,8 @@ Proceso 19: 71 es primo.
     if it ever starts building, so the list cannot rot. It is not patched.
   - Practice 3 keeps the base programs given with the assignment next to my versions,
     because the versions are edits of them and separating them would hide what changed.
-  - Identifiers and comments are in Spanish, and so are the captured outputs.
+  - Identifiers, comments and the captured output are in Spanish, as handed in. Translating
+    them would mean editing code that was graded.
 
 ## Author and licence
 
